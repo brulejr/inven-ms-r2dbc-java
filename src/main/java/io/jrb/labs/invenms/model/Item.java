@@ -23,6 +23,8 @@
  */
 package io.jrb.labs.invenms.model;
 
+import io.jrb.labs.common.entity.Entity;
+import io.jrb.labs.common.entity.EntityBuilder;
 import io.jrb.labs.invenms.resource.ItemResource;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,6 +37,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Builder(toBuilder = true)
@@ -44,11 +47,11 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Table(value = "t_item")
-public class Item {
+public class Item implements Entity {
 
     @Id
     @Column(value = "item_id")
-    long id;
+    Long id;
 
     @Column(value = "guid")
     UUID guid;
@@ -59,11 +62,26 @@ public class Item {
     @Column(value = "description")
     String description;
 
+    @Column(value = "created_by")
+    String createdBy;
+
+    @Column(value = "created_on")
+    Instant createdOn;
+
+    @Column(value = "modified_by")
+    String modifiedBy;
+
+    @Column(value = "modified_on")
+    Instant modifiedOn;
+
     public static ItemBuilder fromResource(final ItemResource itemResource) {
         return Item.builder()
                 .guid(itemResource.getGuid())
                 .name(itemResource.getName())
                 .description(itemResource.getDescription());
+    }
+
+    public static class ItemBuilder implements EntityBuilder<Item, ItemBuilder> {
     }
 
 }

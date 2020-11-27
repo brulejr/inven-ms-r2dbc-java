@@ -21,23 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.repository;
+package io.jrb.labs.common.service.crud;
 
-import io.jrb.labs.common.repository.EntityRepository;
-import io.jrb.labs.invenms.model.Item;
-import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import static java.lang.String.format;
 
-@Repository
-public interface ItemRepository extends EntityRepository<Item> {
+public class CreateEntityException extends CrudServiceException {
 
-    @Query("select item_id, guid, name, description from t_item where guid = $1")
-    Mono<Item> findByGuid(String guid);
-
-    @Query("select item_id, guid, name, description from t_item where name = $1")
-    Flux<Item> findAllByName(String name);
+    public CreateEntityException(final String type, final Throwable cause) {
+        super(format("Unexpected error encountered while creating %s", type), cause);
+    }
 
 }

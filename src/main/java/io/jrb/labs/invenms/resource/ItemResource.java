@@ -31,6 +31,7 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +44,10 @@ public class ItemResource {
     UUID guid;
     String name;
     String description;
+    String createdBy;
+    Instant createdOn;
+    String modifiedBy;
+    Instant modifiedOn;
 
     @Singular
     List<String> groups;
@@ -54,7 +59,11 @@ public class ItemResource {
         return ItemResource.builder()
                 .guid(item.getGuid())
                 .name(item.getName())
-                .description(item.getDescription());
+                .description(item.getDescription())
+                .createdBy(item.getCreatedBy())
+                .createdOn(item.getCreatedOn())
+                .modifiedBy(item.getModifiedBy())
+                .modifiedOn(item.getModifiedOn());
     }
 
     @JsonPOJOBuilder(withPrefix = "")

@@ -21,23 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.repository;
+package io.jrb.labs.common.repository;
 
-import io.jrb.labs.common.repository.EntityRepository;
-import io.jrb.labs.invenms.model.Item;
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Repository
-public interface ItemRepository extends EntityRepository<Item> {
+import java.util.UUID;
 
-    @Query("select item_id, guid, name, description from t_item where guid = $1")
-    Mono<Item> findByGuid(String guid);
+public interface EntityRepository<ENTITY> extends ReactiveCrudRepository<ENTITY, Long> {
 
-    @Query("select item_id, guid, name, description from t_item where name = $1")
-    Flux<Item> findAllByName(String name);
+    Mono<ENTITY> findByGuid(UUID guid);
 
 }

@@ -21,23 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.repository;
+package io.jrb.labs.common.service.crud;
 
-import io.jrb.labs.common.repository.EntityRepository;
-import io.jrb.labs.invenms.model.Item;
-import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+public class CrudServiceException extends RuntimeException {
 
-@Repository
-public interface ItemRepository extends EntityRepository<Item> {
+    public CrudServiceException(final String message) {
+        super(message);
+    }
 
-    @Query("select item_id, guid, name, description from t_item where guid = $1")
-    Mono<Item> findByGuid(String guid);
-
-    @Query("select item_id, guid, name, description from t_item where name = $1")
-    Flux<Item> findAllByName(String name);
+    public CrudServiceException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
 }

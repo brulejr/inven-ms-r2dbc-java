@@ -21,23 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.repository;
+package io.jrb.labs.common.service.crud;
 
-import io.jrb.labs.common.repository.EntityRepository;
-import io.jrb.labs.invenms.model.Item;
-import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import java.util.UUID;
 
-@Repository
-public interface ItemRepository extends EntityRepository<Item> {
+import static java.lang.String.format;
 
-    @Query("select item_id, guid, name, description from t_item where guid = $1")
-    Mono<Item> findByGuid(String guid);
+public class EntityNotFoundException extends CrudServiceException {
 
-    @Query("select item_id, guid, name, description from t_item where name = $1")
-    Flux<Item> findAllByName(String name);
+    public EntityNotFoundException(final String type, final UUID guid) {
+        super(format("No %s resource can be found - guid=%s", type, guid));
+    }
 
 }

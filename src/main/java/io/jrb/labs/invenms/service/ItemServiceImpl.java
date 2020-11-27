@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.invenms.service;
 
+import io.jrb.labs.common.service.crud.CrudServiceSupport;
 import io.jrb.labs.invenms.model.EntityType;
 import io.jrb.labs.invenms.model.Item;
 import io.jrb.labs.invenms.model.LookupValue;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class ItemServiceImpl implements ItemService {
+public class ItemServiceImpl extends CrudServiceSupport<Item, Item.ItemBuilder> implements ItemService {
 
     private final ItemRepository itemRepository;
     private final LookupValueRepository lookupValueRepository;
@@ -48,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
             final ItemRepository itemRepository,
             final LookupValueRepository lookupValueRepository
     ) {
+        super(Item.class, itemRepository);
         this.itemRepository = itemRepository;
         this.lookupValueRepository = lookupValueRepository;
     }
@@ -55,11 +57,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Mono<ItemResource> createItem(final ItemResource item) {
-        return Mono.just(item)
-                .map(resource ->
-                        Item.fromResource(resource)
-                                .build())
-                .flatMap(itemRepository::save)
+        return createEntity(Item.fromResource(item))
                 .flatMap(itemEntity -> {
                     final long itemId = itemEntity.getId();
                     return Mono.zip(
@@ -68,30 +66,26 @@ public class ItemServiceImpl implements ItemService {
                             createLookupValues(itemId, LookupValueType.TAG, item.getTags())
                     );
                 })
-                .map(tuple ->
-                        ItemResource.fromEntity(tuple.getT1())
-                                .groups(tuple.getT2())
-                                .tags(tuple.getT3())
-                                .build()
-                );
+                .map(tuple -> ItemResource.fromEntity(tuple.getT1())
+                        .groups(tuple.getT2())
+                        .tags(tuple.getT3())
+                        .build());
     }
 
     @Override
     @Transactional
     public Mono<Void> deleteItem(final UUID itemGuid) {
-        return itemRepository
-                .findByGuid(itemGuid.toString())
-                .flatMap(itemEntity -> {
-                    final long itemId = itemEntity.getId();
-                    return lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.ITEM, itemId)
-                            .then(itemRepository.deleteById(itemId));
-                });
+        return deleteEntity(itemGuid, itemEntity -> {
+            final long itemId = itemEntity.getId();
+            return lookupValueRepository.deleteByEntityTypeAndEntityId(EntityType.ITEM, itemId)
+                    .then(itemRepository.deleteById(itemId));
+        });
     }
 
     @Override
     @Transactional
     public Mono<ItemResource> findItemByGuid(final UUID itemGuid) {
-        return itemRepository.findByGuid(itemGuid.toString())
+        return findEntityByGuid(itemGuid)
                 .zipWhen(item -> findItemValueList(item.getId()))
                 .map(tuple -> {
                     final ItemResource.ItemResourceBuilder builder = ItemResource.fromEntity(tuple.getT1());
@@ -113,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Flux<ItemResource> listAllItems() {
-        return itemRepository.findAll()
+        return retrieveEntities()
                 .map(entity -> ItemResource.fromEntity(entity).build());
     }
 
