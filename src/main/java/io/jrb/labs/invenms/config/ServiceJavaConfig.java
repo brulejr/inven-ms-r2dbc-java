@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceJavaConfig {
 
     @Bean
-    public ItemService thingService(
+    public ItemService itemService(
             final ItemRepository itemRepository,
             final LookupValueRepository lookupValueRepository
     ) {

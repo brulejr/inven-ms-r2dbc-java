@@ -21,23 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.config;
+package io.jrb.labs.common.resource;
 
-import io.jrb.labs.common.rest.GlobalErrorHandler;
-import io.jrb.labs.invenms.rest.ItemController;
-import io.jrb.labs.invenms.service.ItemService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-@Configuration
-public class RestJavaConfig {
+public class ErrorResponseEntity extends ResponseEntity<ErrorResponse> {
 
-    @Bean
-    public GlobalErrorHandler globalErrorHandler() { return new GlobalErrorHandler(); }
+    public static ErrorResponseEntity badRequest(final String message) {
+        return new ErrorResponseEntity(ErrorResponse.build(HttpStatus.BAD_REQUEST, message));
+    }
 
-    @Bean
-    public ItemController itemController(final ItemService itemService) {
-        return new ItemController(itemService);
+    public static ErrorResponseEntity conflict(final String message) {
+        return new ErrorResponseEntity(ErrorResponse.build(HttpStatus.CONFLICT, message));
+    }
+
+    public static ErrorResponseEntity notFound(final String message) {
+        return new ErrorResponseEntity(ErrorResponse.build(HttpStatus.NOT_FOUND, message));
+    }
+
+    public static ErrorResponseEntity serverError(final String message) {
+        return new ErrorResponseEntity(ErrorResponse.build(HttpStatus.INTERNAL_SERVER_ERROR, message));
+    }
+
+    public ErrorResponseEntity(final ErrorResponse body) {
+        super(body, body.getStatus());
     }
 
 }

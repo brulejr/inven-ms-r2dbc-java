@@ -21,23 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.config;
+package io.jrb.labs.common.rest;
 
-import io.jrb.labs.common.rest.GlobalErrorHandler;
-import io.jrb.labs.invenms.rest.ItemController;
-import io.jrb.labs.invenms.service.ItemService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import io.jrb.labs.common.resource.ErrorResponseEntity;
+import io.jrb.labs.common.service.crud.EntityNotFoundException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@Configuration
-public class RestJavaConfig {
+@ControllerAdvice
+public class GlobalErrorHandler {
 
-    @Bean
-    public GlobalErrorHandler globalErrorHandler() { return new GlobalErrorHandler(); }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ErrorResponseEntity handleEntityNotFoundException(final EntityNotFoundException e) {
+        return ErrorResponseEntity.notFound(e.getMessage());
+    }
 
-    @Bean
-    public ItemController itemController(final ItemService itemService) {
-        return new ItemController(itemService);
+    @ExceptionHandler(Throwable.class)
+    public ErrorResponseEntity handleThrowable(final Throwable t) {
+        return ErrorResponseEntity.serverError(t.getMessage());
     }
 
 }

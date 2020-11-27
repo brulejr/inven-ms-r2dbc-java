@@ -21,23 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.config;
+package io.jrb.labs.common.resource;
 
-import io.jrb.labs.common.rest.GlobalErrorHandler;
-import io.jrb.labs.invenms.rest.ItemController;
-import io.jrb.labs.invenms.service.ItemService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.Builder;
+import lombok.Value;
+import org.springframework.http.HttpStatus;
 
-@Configuration
-public class RestJavaConfig {
+import java.time.Instant;
+import java.util.List;
 
-    @Bean
-    public GlobalErrorHandler globalErrorHandler() { return new GlobalErrorHandler(); }
+@Value
+@Builder(toBuilder = true)
+@JsonDeserialize(builder = ErrorResponse.ErrorResponseBuilder.class)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class ErrorResponse {
 
-    @Bean
-    public ItemController itemController(final ItemService itemService) {
-        return new ItemController(itemService);
+    HttpStatus status;
+
+    Integer code;
+
+    String message;
+
+    @Builder.Default
+    Instant timestamp = Instant.now();
+
+    List<String> bindingErrors;
+
+    public static ErrorResponse build(final HttpStatus status, final String message) {
+        return builder()
+                .status(status)
+                .code(status.value())
+                .message(message)
+                .build();
+    }
+
+    @JsonPOJOBuilder(withPrefix = "")
+    public static class ErrorResponseBuilder {
     }
 
 }
