@@ -21,25 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.common.entity;
+package io.jrb.labs.common.service.crud;
 
-import java.time.Instant;
 import java.util.UUID;
 
-public interface EntityBuilder<E extends Entity, B extends EntityBuilder<E, B>> {
+import static java.lang.String.format;
 
-    E build();
+public class UpdateEntityException extends CrudServiceException {
 
-    B id(Long id);
-
-    B createdBy(String createdBy);
-
-    B createdOn(Instant createdOn);
-
-    B guid(UUID guid);
-
-    B modifiedBy(String modifiedBy);
-
-    B modifiedOn(Instant createdOn);
+    public UpdateEntityException(final String type, final UUID guid, final Throwable cause) {
+        super(format("Unexpected error encountered while updating %s - guid=%s", type, guid), cause);
+    }
 
 }

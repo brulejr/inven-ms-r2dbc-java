@@ -23,11 +23,13 @@
  */
 package io.jrb.labs.invenms.rest;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import io.jrb.labs.invenms.resource.ItemResource;
 import io.jrb.labs.invenms.service.ItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,13 +53,13 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ItemResource> createThing(@RequestBody final ItemResource thing) {
+    public Mono<ItemResource> createItem(@RequestBody final ItemResource thing) {
         return itemService.createItem(thing);
     }
 
     @DeleteMapping("/{itemGuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> deleteThing(@PathVariable final UUID itemGuid) {
+    public Mono<Void> deleteItem(@PathVariable final UUID itemGuid) {
         return itemService.deleteItem(itemGuid);
     }
 
@@ -67,8 +69,16 @@ public class ItemController {
     }
 
     @GetMapping
-    public Flux<ItemResource> listThings() {
+    public Flux<ItemResource> listItems() {
         return itemService.listAllItems();
+    }
+
+    @PatchMapping("/{itemGuid}")
+    public Mono<ItemResource> updateItem(
+            @PathVariable final UUID itemGuid,
+            @RequestBody final JsonPatch itemPatch
+    ) {
+        return itemService.updateItem(itemGuid, itemPatch);
     }
 
 }

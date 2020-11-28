@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.invenms.service;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import io.jrb.labs.invenms.resource.ItemResource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,5 +39,7 @@ public interface ItemService {
     Mono<ItemResource> findItemByGuid(UUID guid);
 
     Flux<ItemResource> listAllItems();
+
+    Mono<ItemResource> updateItem(UUID guid, JsonPatch patch);
 
 }

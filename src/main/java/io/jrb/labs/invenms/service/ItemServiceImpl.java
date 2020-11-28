@@ -23,6 +23,8 @@
  */
 package io.jrb.labs.invenms.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
 import io.jrb.labs.common.service.crud.CrudServiceSupport;
 import io.jrb.labs.invenms.model.EntityType;
 import io.jrb.labs.invenms.model.Item;
@@ -47,9 +49,10 @@ public class ItemServiceImpl extends CrudServiceSupport<Item, Item.ItemBuilder> 
 
     public ItemServiceImpl(
             final ItemRepository itemRepository,
-            final LookupValueRepository lookupValueRepository
+            final LookupValueRepository lookupValueRepository,
+            final ObjectMapper objectMapper
     ) {
-        super(Item.class, itemRepository);
+        super(Item.class, itemRepository, objectMapper);
         this.itemRepository = itemRepository;
         this.lookupValueRepository = lookupValueRepository;
     }
@@ -109,6 +112,16 @@ public class ItemServiceImpl extends CrudServiceSupport<Item, Item.ItemBuilder> 
     public Flux<ItemResource> listAllItems() {
         return retrieveEntities()
                 .map(entity -> ItemResource.fromEntity(entity).build());
+    }
+
+    @Override
+    @Transactional
+    public Mono<ItemResource> updateItem(final UUID guid, final JsonPatch patch) {
+        return updateEntity(guid, entity -> {
+            final ItemResource resource = ItemResource.fromEntity(entity).build();
+            final ItemResource updatedResource = applyPatch(guid, patch, resource, ItemResource.class);
+            return Item.fromResource(updatedResource);
+        }).flatMap(entity -> findItemByGuid(entity.getGuid()));
     }
 
     private Mono<List<String>> createLookupValues(

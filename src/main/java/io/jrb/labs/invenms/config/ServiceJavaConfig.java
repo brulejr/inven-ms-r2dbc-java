@@ -23,6 +23,7 @@
  */
 package io.jrb.labs.invenms.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jrb.labs.invenms.repository.ItemRepository;
 import io.jrb.labs.invenms.repository.LookupValueRepository;
 import io.jrb.labs.invenms.service.ItemService;
@@ -36,9 +37,10 @@ public class ServiceJavaConfig {
     @Bean
     public ItemService itemService(
             final ItemRepository itemRepository,
-            final LookupValueRepository lookupValueRepository
+            final LookupValueRepository lookupValueRepository,
+            final ObjectMapper objectMapper
     ) {
-        return new ItemServiceImpl(itemRepository, lookupValueRepository);
+        return new ItemServiceImpl(itemRepository, lookupValueRepository, objectMapper);
     }
 
 }

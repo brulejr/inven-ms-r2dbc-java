@@ -23,6 +23,9 @@
  */
 package io.jrb.labs.common.service.crud;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
 import io.jrb.labs.common.entity.Entity;
 import io.jrb.labs.common.entity.EntityBuilder;
 import io.jrb.labs.common.repository.EntityRepository;
@@ -40,13 +43,28 @@ public abstract class CrudServiceSupport<E extends Entity, EB extends EntityBuil
 
     private final String entityType;
 
+    private final ObjectMapper objectMapper;
+
     public CrudServiceSupport(
             final Class<E> entityClass,
-            final EntityRepository<E> entityRepository
+            final EntityRepository<E> entityRepository,
+            final ObjectMapper objectMapper
     ) {
         this.entityRepository = entityRepository;
+        this.objectMapper = objectMapper;
 
         this.entityType = entityClass.getSimpleName();
+    }
+
+    protected <R> R applyPatch(
+            final UUID guid, final JsonPatch patch, final R resource, final Class<R> resourceClass
+    ) {
+        try {
+            final JsonNode patched = patch.apply(objectMapper.convertValue(resource, JsonNode.class));
+            return objectMapper.treeToValue(patched, resourceClass);
+        } catch (final Exception e) {
+            throw new PatchInvalidException(resourceClass.getSimpleName(), guid, e);
+        }
     }
 
     protected Mono<E> createEntity(final EB entityBuilder) {
@@ -61,7 +79,6 @@ public abstract class CrudServiceSupport<E extends Entity, EB extends EntityBuil
                     .onErrorResume(handleMonoError(t -> new CreateEntityException(entityType, t)));
         });
     }
-
 
     protected Mono<Void> deleteEntity(final UUID guid, final Function<E, Mono<Void>> fnDelete) {
         return entityRepository.findByGuid(guid)
@@ -79,6 +96,23 @@ public abstract class CrudServiceSupport<E extends Entity, EB extends EntityBuil
     protected Flux<E> retrieveEntities() {
         return entityRepository.findAll()
                 .onErrorResume(handleFluxError(t -> new RetrieveEntitiesException(entityType, t)));
+    }
+
+    protected Mono<E> updateEntity(final UUID guid, final Function<E, EB> fnUpdate) {
+        return entityRepository.findByGuid(guid)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException(entityType, guid)))
+                .map(entity -> {
+                    final Instant timestamp = Instant.now();
+                    return fnUpdate.apply(entity)
+                            .id(entity.getId())
+                            .createdBy(entity.getCreatedBy())
+                            .createdOn(entity.getCreatedOn())
+                            .modifiedBy(entity.getModifiedBy())
+                            .modifiedOn(timestamp)
+                            .build();
+                })
+                .flatMap(entityRepository::save)
+                .onErrorResume(handleMonoError(t -> new UpdateEntityException(entityType, guid, t)));
     }
 
     private <T> Function<? super Throwable, ? extends Publisher<? extends T>> handleFluxError(
