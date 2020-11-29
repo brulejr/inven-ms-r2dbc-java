@@ -30,6 +30,7 @@ import io.jrb.labs.invenms.model.EntityType;
 import io.jrb.labs.invenms.model.Item;
 import io.jrb.labs.invenms.model.LookupValue;
 import io.jrb.labs.invenms.model.LookupValueType;
+import io.jrb.labs.invenms.model.Projection;
 import io.jrb.labs.invenms.repository.ItemRepository;
 import io.jrb.labs.invenms.repository.LookupValueRepository;
 import io.jrb.labs.invenms.resource.ItemResource;
@@ -87,9 +88,11 @@ public class ItemServiceImpl extends CrudServiceSupport<Item, Item.ItemBuilder> 
 
     @Override
     @Transactional
-    public Mono<ItemResource> findItemByGuid(final UUID itemGuid) {
+    public Mono<ItemResource> findItemByGuid(final UUID itemGuid, final Projection projection) {
         return findEntityByGuid(itemGuid)
-                .zipWhen(item -> findItemValueList(item.getId()))
+                .zipWhen(item -> (projection == Projection.DEEP)
+                        ? findItemValueList(item.getId())
+                        : Mono.just(List.<LookupValue>of()))
                 .map(tuple -> {
                     final ItemResource.ItemResourceBuilder builder = ItemResource.fromEntity(tuple.getT1());
                     tuple.getT2().forEach(lookupValue -> {
@@ -121,7 +124,7 @@ public class ItemServiceImpl extends CrudServiceSupport<Item, Item.ItemBuilder> 
             final ItemResource resource = ItemResource.fromEntity(entity).build();
             final ItemResource updatedResource = applyPatch(guid, patch, resource, ItemResource.class);
             return Item.fromResource(updatedResource);
-        }).flatMap(entity -> findItemByGuid(entity.getGuid()));
+        }).flatMap(entity -> findItemByGuid(entity.getGuid(), Projection.DETAILS));
     }
 
     private Mono<List<String>> createLookupValues(

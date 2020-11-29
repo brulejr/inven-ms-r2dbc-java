@@ -21,26 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.service;
+package io.jrb.labs.invenms.model;
 
-import com.github.fge.jsonpatch.JsonPatch;
-import io.jrb.labs.invenms.model.Projection;
-import io.jrb.labs.invenms.resource.ItemResource;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+public enum Projection {
 
-import java.util.UUID;
+    SUMMARY(Summary.class),
+    DETAILS(Detail.class),
+    DEEP(Deep.class);
 
-public interface ItemService {
+    private final Class<?> view;
 
-    Mono<ItemResource> createItem(ItemResource item);
+    Projection(final Class<?> view) {
+        this.view = view;
+    }
 
-    Mono<Void> deleteItem(UUID itemGuid);
+    public Class<?> getView() {
+        return view;
+    }
 
-    Mono<ItemResource> findItemByGuid(UUID guid, Projection projection);
+    public static class Summary {
+    }
 
-    Flux<ItemResource> listAllItems();
+    public static class Detail extends Summary {
+    }
 
-    Mono<ItemResource> updateItem(UUID guid, JsonPatch patch);
+    public static class Deep extends Detail {
+    }
 
 }

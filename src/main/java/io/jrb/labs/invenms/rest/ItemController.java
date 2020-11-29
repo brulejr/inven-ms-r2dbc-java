@@ -23,10 +23,14 @@
  */
 package io.jrb.labs.invenms.rest;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.jrb.labs.invenms.resource.ItemResource;
+import io.jrb.labs.invenms.model.Projection;
 import io.jrb.labs.invenms.service.ItemService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -43,6 +48,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/item")
+@Slf4j
 public class ItemController {
 
     private final ItemService itemService;
@@ -64,11 +70,16 @@ public class ItemController {
     }
 
     @GetMapping("/{itemGuid}")
-    public Mono<ItemResource> getSongById(@PathVariable final UUID itemGuid) {
-        return itemService.findItemByGuid(itemGuid);
+    public Mono<MappingJacksonValue> getSongById(
+            @PathVariable final UUID itemGuid,
+            @RequestParam(name = "projection", defaultValue = "DETAILS") final Projection projection
+    ) {
+        return itemService.findItemByGuid(itemGuid, projection)
+                .map(resource -> wrapWithView(resource, projection));
     }
 
     @GetMapping
+    @JsonView(Projection.Summary.class)
     public Flux<ItemResource> listItems() {
         return itemService.listAllItems();
     }
@@ -79,6 +90,12 @@ public class ItemController {
             @RequestBody final JsonPatch itemPatch
     ) {
         return itemService.updateItem(itemGuid, itemPatch);
+    }
+
+    private <R> MappingJacksonValue wrapWithView(final R resource, final Projection projection) {
+        final MappingJacksonValue result = new MappingJacksonValue(resource);
+        result.setSerializationView(projection.getView());
+        return result;
     }
 
 }

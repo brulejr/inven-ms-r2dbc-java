@@ -24,9 +24,11 @@
 package io.jrb.labs.invenms.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.jrb.labs.invenms.model.Item;
+import io.jrb.labs.invenms.model.Projection;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
@@ -41,17 +43,32 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ItemResource {
 
+    @JsonView(Projection.Summary.class)
     UUID guid;
+
+    @JsonView(Projection.Summary.class)
     String name;
+
+    @JsonView(Projection.Detail.class)
     String description;
+
+    @JsonView(Projection.Detail.class)
     String createdBy;
+
+    @JsonView(Projection.Detail.class)
     Instant createdOn;
+
+    @JsonView(Projection.Detail.class)
     String modifiedBy;
+
+    @JsonView(Projection.Detail.class)
     Instant modifiedOn;
 
+    @JsonView(Projection.Deep.class)
     @Singular
     List<String> groups;
 
+    @JsonView(Projection.Deep.class)
     @Singular
     List<String> tags;
 
