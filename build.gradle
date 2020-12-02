@@ -1,7 +1,9 @@
 plugins {
 	id 'org.springframework.boot' version '2.4.0'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'com.google.cloud.tools.jib' version '1.8.0'
 	id 'java'
+	id 'jacoco'
 }
 
 group = 'io.jrb.labs'
@@ -34,4 +36,18 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+	jacoco {
+		destinationFile = file("$buildDir/jacoco/jacoco.exec")
+	}
+}
+
+jib {
+	to {
+		image "brulejr/inven-ms-r2dbc-java"
+		auth {
+			// retrieve from Jenkins
+			username "${System.env.DOCKERHUB_CREDENTIALS_USR}"
+			password "${System.env.DOCKERHUB_CREDENTIALS_PSW}"
+		}
+	}
 }
