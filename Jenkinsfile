@@ -10,6 +10,9 @@ pipeline {
             }
         }
         stage("Compile") {
+            tools {
+                jdk "openjdk-11"
+            }
             steps {
                 sh "./gradlew clean classes testClasses"
             }
