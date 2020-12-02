@@ -2,6 +2,10 @@ pipeline {
 
     agent any
 
+    tools {
+        jdk "openjdk-11"
+    }
+
     stages {
         stage ('Checkout') {
             steps {
@@ -10,9 +14,6 @@ pipeline {
             }
         }
         stage("Compile") {
-            tools {
-                jdk "openjdk-11"
-            }
             steps {
                 sh "./gradlew clean classes testClasses"
             }
