@@ -44,11 +44,6 @@ pipeline {
             environment {
                 TARGET_HOST = credentials('TARGET_HOST')
             }
-            when {
-                expression {
-                   return params.TARGET_HOST != ''
-                }
-            }
             steps {
                 echo "Will deploy to ${TARGET_HOST}"
             }
