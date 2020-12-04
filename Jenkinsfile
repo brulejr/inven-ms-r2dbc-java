@@ -7,17 +7,6 @@ pipeline {
     }
 
     stages {
-        stage ('Setup parameters') {
-            steps {
-                script {
-                    properties([
-                        parameters([
-                            string(defaultValue: '', description: '', name: 'TARGET_HOST', trim: true)
-                        ])
-                    ])
-                }
-            }
-        }
         stage ('Checkout') {
             steps {
                 checkout scm
@@ -52,6 +41,9 @@ pipeline {
             }
         }
         stage ('Deploy') {
+            environment {
+                TARGET_HOST = credentials('TARGET_HOST')
+            }
             when {
                 expression {
                    return params.TARGET_HOST != ''
