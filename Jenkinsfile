@@ -40,6 +40,21 @@ pipeline {
                 sh "./gradlew jib"
             }
         }
+        stage ('Deploy') {
+            properties([
+                parameters([
+                    string(defaultValue: '', description: '', name: 'TARGET_HOST', trim: true)
+                ])
+            ])
+            when {
+                expression {
+                   return params.TARGET_HOST != ''
+                }
+            }
+            steps {
+                echo "Will deploy to ${TARGET_HOST}"
+            }
+        }
     }
 
 }
