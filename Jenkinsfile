@@ -41,11 +41,9 @@ pipeline {
             }
         }
         stage ('Deploy') {
-            environment {
-                TARGET_HOST = credentials('TARGET_HOST')
-            }
             steps {
-                echo "Will deploy to ${TARGET_HOST}"
+                echo "Will deploy to ${API_TARGET_HOST}"
+                sh 'printenv'
             }
         }
     }
