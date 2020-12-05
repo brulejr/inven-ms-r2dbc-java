@@ -42,8 +42,7 @@ pipeline {
         }
         stage ('Deploy') {
             steps {
-                echo "Will deploy to ${API_TARGET_HOST}"
-                sh 'printenv'
+                echo "Deploying '${DOCKERHUB_CREDENTIALS_USR}/${JOB_NAME}' to ${API_TARGET_HOST}..."
             }
         }
     }
