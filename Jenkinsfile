@@ -40,14 +40,6 @@ pipeline {
                 sh "./gradlew jib"
             }
         }
-        stage ('Deploy') {
-            environment {
-                DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-            }
-            steps {
-                sh('echo Deploying ${DOCKERHUB_CREDENTIALS_USR}/${JOB_NAME} to ${API_TARGET_HOST}...')
-            }
-        }
     }
 
 }
