@@ -21,27 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.jrb.labs.invenms.config;
+package io.jrb.labs.invenms.rest;
 
-import io.jrb.labs.common.rest.GlobalErrorHandler;
-import io.jrb.labs.invenms.rest.ItemController;
-import io.jrb.labs.invenms.rest.TestController;
-import io.jrb.labs.invenms.service.ItemService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Configuration
-public class RestJavaConfig {
+@RefreshScope
+@RestController
+public class TestController {
 
-    @Bean
-    public GlobalErrorHandler globalErrorHandler() { return new GlobalErrorHandler(); }
+    @Value("${message:Hello default}")
+    private String message;
 
-    @Bean
-    public ItemController itemController(final ItemService itemService) {
-        return new ItemController(itemService);
+    @RequestMapping("/message")
+    String getMessage() {
+        return this.message;
     }
-
-    @Bean
-    public TestController testController() { return new TestController(); }
 
 }

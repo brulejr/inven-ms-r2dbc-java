@@ -1,4 +1,8 @@
+spring.application.name: inven-ms
+spring.profiles.active: local
+
 info:
+  app.name: ${spring.application.name}
   app.version: LOCAL
 
 server:
